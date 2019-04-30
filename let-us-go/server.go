@@ -6,7 +6,7 @@ import (
 
 	"github.com/labstack/echo"
 
-	"controllers"	
+	"./controllers"	
 )
 
 func main() {
@@ -19,6 +19,8 @@ func main() {
 	}
 
 	controllers.HomeController{}.Init(server.Group("/"))
+
+	server.Static("/static", "static")
 
 	server.Logger.Fatal(server.StartServer(server_header))
 }
