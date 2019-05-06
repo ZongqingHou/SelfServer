@@ -1,6 +1,7 @@
 FROM golang:latest
 
-RUN go get github.com/labstack/echo
+RUN go get github.com/labstack/echo \
+ && go get github.com/go-sql-driver/mysql
 #  && go get github.com/go-xorm/xorm \
 #  && go get github.com/spf13/viper \
 #  && go get github.com/asaskevich/govalidator \
