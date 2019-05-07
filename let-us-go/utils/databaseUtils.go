@@ -3,39 +3,24 @@ package utils
 import (
 	"context"
 
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-xorm/xorm"
+	_ "github.com/go-sql-driver/mysql" // mysql
+	"github.com/Shopify/sarama"		   // kafka
+	"github.com/go-redis/redis"		   // redis
+
+	"github.com/go-xorm/xorm"		   // engine
 )
+
+/*
+	The definations
+*/
 
 type ContextDB struct {
 	*xorm.Engine
 }
 
-func New(db *xorm.Engine, service string, config kafka.Config) *ContextDB {
-	db.ShowExecTime()
-	if len(config.Brokers) != 0 {
-		if producer, err := kafka.NewProducer(config.Brokers, config.Topic,
-			kafka.WithDefault(),
-			kafka.WithTLS(config.SSL)); err == nil {
-			db.SetLogger(&dbLogger{serviceName: service, Producer: producer})
-			db.ShowSQL()
-		}
-	}
-
-	return &ContextDB{Engine: db}
-}
-
-func (db *ContextDB) NewSession(ctx context.Context) *xorm.Session {
-	session := db.Engine.NewSession()
-
-	func(session interface{}, ctx context.Context) {
-		if s, ok := session.(interface{ SetContext(context.Context) }); ok {
-			s.SetContext(ctx)
-		}
-	}(session, ctx)
-
-	return session
-}
+/*
+	The initilation functions
+*/
 
 func initDB(driver, conntection string) (*xorm.Engine, error) {
 	db, err := xorm.NewEngine(driver, conntection)
@@ -48,6 +33,26 @@ func initDB(driver, conntection string) (*xorm.Engine, error) {
 	}
 	return db, nil
 }
+
+/*
+	The Session related functions
+*/
+
+func (db *ContextDB) NewSession(ctx context.Context) *xorm.Session {
+	session := db.Engine.NewSession()
+
+	func(session interface{}, ctx context.Context) {
+		if tmpSession, ok := session.(interface{ SetContext(context.Context) }); ok {
+			tmpSession.SetContext(ctx)
+		}
+	}(session, ctx)
+
+	return session
+}
+
+/*
+	The middleware functions
+*/
 
 func ContextDB(service string, xormEngine *xorm.Engine, kafkaConfig kafka.Config) echo.MiddlewareFunc {
 	db := ctxdb.New(xormEngine, service)
