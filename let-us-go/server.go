@@ -23,17 +23,6 @@ type ServerConfig struct {
 	}
 }
 
-func initDatabase(driver, conntection string) (*xorm.Engine, error) {
-	db, err := xorm.NewEngine(driver, conntection)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = db.Sync(new(modules.Test)); err != nil {
-		panic(err)
-	}
-	return db, nil
-}
 
 func main() {
 	db, err := initDatabase("mysql", "root:123456@tcp(127.0.0.1:3306)/hdd?charset=utf8")
