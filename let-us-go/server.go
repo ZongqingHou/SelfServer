@@ -5,12 +5,11 @@ import (
 	"time"
 
 	"github.com/labstack/echo"
-	"github.com/go-xorm/xorm"
-
-	_ "github.com/go-sql-driver/mysql"
 
 	"./controllers"
-	"./modules"
+	// "./modules"
+
+	"./utils"
 )
 
 type ServerConfig struct {
@@ -25,7 +24,7 @@ type ServerConfig struct {
 
 
 func main() {
-	db, err := initDatabase("mysql", "root:123456@tcp(127.0.0.1:3306)/hdd?charset=utf8")
+	db, err := utils.InitDB("mysql", "root:123456@tcp(127.0.0.1:3306)/hdd?charset=utf8")
 	if err != nil {
 		panic(err)
 	}
