@@ -24,11 +24,11 @@ type ServerConfig struct {
 
 
 func main() {
-	db, err := utils.InitDB("mysql", "root:123456@tcp(127.0.0.1:3306)/hdd?charset=utf8")
-	if err != nil {
-		panic(err)
-	}
+	db := utils.InitMySQL("mysql", "root:123456@tcp(127.0.0.1:3306)/hdd?charset=utf8")
 	defer db.Close()
+
+	rd := utils.InitRedis("localhost:6379", "", 0)
+	defer rd.Close()
 
 	server := echo.New()
 
