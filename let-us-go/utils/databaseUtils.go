@@ -65,21 +65,25 @@ func InitRedis(addr string, pswd string, device int) (*redis.Client){
 	The Session related functions
 */
 
-func NewSession(xormEngine *xorm.Engine, ctx context.Context) *xorm.Session {
-	session := xormEngine.NewSession()
 
-	func(session interface{}, ctx context.Context) {
-		if tmpSession, ok := session.(interface{ SetContext(context.Context) }); ok {
-			tmpSession.SetContext(ctx)
-		}
-	}(session, ctx)
 
-	return session
-}
+// func NewRedisSession(redisClient *redis.Client, ctx context.Context) *redis.Session {
+// 	session := redisClient.NewSession()
+
+
+// }
 
 /*
 	The middleware functions
 */
+func SaveSessionID(redisClient *redis.Client) echo.MiddlewareFunc{
+	return func(next echo.HandlerFunc) echo.HandlerFunc{
+		return func(serverContext echo.Context) error {
+			return nil
+		}
+	}
+}
+
 
 func ContextMySQL(xormEngine *xorm.Engine, redisClient *redis.Client) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
