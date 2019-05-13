@@ -2,12 +2,15 @@ package utils
 
 import (
 	"fmt"
-	// "context"
+	"log"
+	"context"
+	"net/http"
+
+	"github.com/labstack/echo"
 
 	_ "github.com/go-sql-driver/mysql" // mysql
 	// "github.com/Shopify/sarama"		   // kafka
 	"github.com/go-redis/redis"		   // redis
-
 	"github.com/go-xorm/xorm"		   // engine
 
 	"../modules"
@@ -62,48 +65,51 @@ func InitRedis(addr string, pswd string, device int) (*redis.Client){
 	The Session related functions
 */
 
-// func (db *ContextDB) NewSession(ctx context.Context) *xorm.Session {
-// 	session := db.Engine.NewSession()
+func NewSession(xormEngine *xorm.Engine, ctx context.Context) *xorm.Session {
+	session := xormEngine.NewSession()
 
-// 	func(session interface{}, ctx context.Context) {
-// 		if tmpSession, ok := session.(interface{ SetContext(context.Context) }); ok {
-// 			tmpSession.SetContext(ctx)
-// 		}
-// 	}(session, ctx)
+	func(session interface{}, ctx context.Context) {
+		if tmpSession, ok := session.(interface{ SetContext(context.Context) }); ok {
+			tmpSession.SetContext(ctx)
+		}
+	}(session, ctx)
 
-// 	return session
-// }
+	return session
+}
 
 /*
 	The middleware functions
 */
 
-func ContextDB(xormEngine *xorm.Engine, redisClient *redis.Client) echo.MiddlewareFunc {
+func ContextMySQL(xormEngine *xorm.Engine, redisClient *redis.Client) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(serverContext echo.Context) error {
 			serverRequest := serverContext.Request()
-			contextPtr := serverContext.Context()
+			contextPtr := serverRequest.Context()
 
-			serverRequest.SetRequest(serverRequest.WithContext(context.WithValue(serverContext, ContextDBName)))
+			session := NewSession(xormEngine, contextPtr)
+			defer session.Close()
 
-			switch req.Method {
-			case "POST", "PUT", "DELETE", "PATCH":
-				if err := session.Begin(); err != nil {
-					log.Println(err)
-				}
-				if err := next(c); err != nil {
-					session.Rollback()
-					return err
-				}
-				if c.Response().Status >= 500 {
-					session.Rollback()
-					return nil
-				}
-				if err := session.Commit(); err != nil {
-					return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-				}
-			default:
-				return next(c)
+			serverContext.SetRequest(serverRequest.WithContext(context.WithValue(contextPtr, ContextMySQLName, session)))
+
+			switch serverRequest.Method{
+				case "POST", "PUT", "DELETE", "PATCH":
+					if err := session.Begin; err != nil {
+						log.Println(err)
+					}
+					if err := next(serverContext); err != nil {
+						session.Rollback()
+						return err
+					}
+					if serverContext.Response().Status >= 500 {
+						session.Rollback()
+						return nil
+					}
+					if err := session.Commit(); err != nil {
+						return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+					}
+				default:
+					return next(serverContext)
 			}
 
 			return nil

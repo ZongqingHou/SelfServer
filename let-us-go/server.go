@@ -41,6 +41,7 @@ func main() {
 	controllers.HomeController{}.Init(server.Group("/"))
 	controllers.TestController{}.Init(server.Group("/test"))
 
+	server.Use(utils.ContextMySQL(db, rd))
 	server.Static("/static", "static")
 
 	/*
