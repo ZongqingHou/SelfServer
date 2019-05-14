@@ -2,11 +2,12 @@ package utils
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/Shopify/sarama"        // kafka
+	"github.com/go-redis/redis"        // redis
 	_ "github.com/go-sql-driver/mysql" // mysql
-	// "github.com/Shopify/sarama"		   // kafka
-	"github.com/go-redis/redis" // redis
-	"github.com/go-xorm/xorm"   // engine
+	"github.com/go-xorm/xorm"          // engine
 
 	"../modules"
 )
@@ -48,4 +49,18 @@ func InitRedis(addr string, pswd string, device int) *redis.Client {
 	}
 
 	return rd
+}
+
+func InitKafkaProducer(address []string) *sarama.AsyncProducer {
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+	config.Producer.Timeout = 5 * time.Second
+
+	producer, err := sarama.NewAsyncProducer(address, config)
+
+	if err != nil {
+		panic(producer)
+	}
+
+	return &producer
 }
