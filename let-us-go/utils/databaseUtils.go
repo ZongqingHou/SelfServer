@@ -17,6 +17,7 @@ import (
 */
 const ContextMySQLName = "mysql"
 const ContextRedisName = "redis"
+const ContextKafkaName = "kafka"
 
 /*
 	The initilation functions
@@ -51,7 +52,7 @@ func InitRedis(addr string, pswd string, device int) *redis.Client {
 	return rd
 }
 
-func InitKafkaProducer(address []string) *sarama.AsyncProducer {
+func InitKafkaProducer(address []string) (*sarama.AsyncProducer, error) {
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
 	config.Producer.Timeout = 5 * time.Second
@@ -59,8 +60,18 @@ func InitKafkaProducer(address []string) *sarama.AsyncProducer {
 	producer, err := sarama.NewAsyncProducer(address, config)
 
 	if err != nil {
-		panic(producer)
+		panic(err)
 	}
 
-	return &producer
+	return &producer, nil
+}
+
+func InitKafkaConsumer(address []string) (*sarama.Consumer, error) {
+	config := sarama.NewConfig()
+	consumer, err := sarama.NewConsumer(address, config)
+	if err != nil {
+		panic(err)
+	}
+
+	return &consumer, nil
 }
