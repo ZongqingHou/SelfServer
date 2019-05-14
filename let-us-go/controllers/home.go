@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -15,6 +16,9 @@ func (controller HomeController) Init(group *echo.Group) {
 }
 
 func (HomeController) Get(context echo.Context) error {
+	serverRequest := context.Request()
+	contextPtr := serverRequest.Context()
+	fmt.Println(contextPtr)
 	return context.String(http.StatusOK, "Hello, World!")
 }
 

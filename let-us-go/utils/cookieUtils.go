@@ -2,19 +2,30 @@ package utils
 
 import (
 	"fmt"
-	"log"
-	"context"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo"
-
-	_ "github.com/go-sql-driver/mysql" // mysql
-	// "github.com/Shopify/sarama"		   // kafka
-	"github.com/go-redis/redis"		   // redis
-	"github.com/go-xorm/xorm"		   // engine
-
-	"../modules"
-
 )
 
-func 
+type Cookie struct {
+}
+
+func writeCookie(c echo.Context) error {
+	cookie := new(http.Cookie)
+	cookie.Name = "username"
+	cookie.Value = "jon"
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	c.SetCookie(cookie)
+	return nil
+}
+
+func readCookie(c echo.Context) (string, error) {
+	cookie, err := c.Cookie("username")
+	if err != nil {
+		return "", err
+	}
+	fmt.Println(cookie.Name)
+	fmt.Println(cookie.Value)
+	return cookie.Value, nil
+}

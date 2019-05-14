@@ -13,15 +13,12 @@ import (
 )
 
 type ServerConfig struct {
-	Database struct{
-
+	Database struct {
 	}
 
-	Server struct{
-
+	Server struct {
 	}
 }
-
 
 func main() {
 	db := utils.InitMySQL("mysql", "root:123456@tcp(127.0.0.1:3306)/hdd?charset=utf8")
@@ -41,13 +38,12 @@ func main() {
 	controllers.HomeController{}.Init(server.Group("/"))
 	controllers.TestController{}.Init(server.Group("/test"))
 
-	server.Use(utils.ContextMySQL(db, rd))
+	server.Use(utils.ContextSession(db, rd))
 	server.Static("/static", "static")
 
 	/*
 		need to use the middleware for pre and use functions
 	*/
-
 
 	server.Logger.Fatal(server.StartServer(server_header))
 }
