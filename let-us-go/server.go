@@ -21,11 +21,8 @@ type ServerConfig struct {
 }
 
 func main() {
-	db := utils.InitMySQL("mysql", "root:123456@tcp(127.0.0.1:3306)/hdd?charset=utf8")
-	defer db.Close()
-
-	rd := utils.InitRedis("localhost:6379", "", 0)
-	defer rd.Close()
+	message := utils.InitMessageProcesser()
+	utils.MessageClose(message)
 
 	server := echo.New()
 
@@ -38,7 +35,7 @@ func main() {
 	controllers.HomeController{}.Init(server.Group("/"))
 	controllers.TestController{}.Init(server.Group("/test"))
 
-	server.Use(utils.ContextSession(db, rd))
+	server.Use(utils.ContextSession(message))
 	server.Static("/static", "static")
 
 	/*

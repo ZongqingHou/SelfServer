@@ -2,9 +2,9 @@ package utils
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/Shopify/sarama"        // kafka
+	// kafka
+	"github.com/Shopify/sarama"
 	"github.com/go-redis/redis"        // redis
 	_ "github.com/go-sql-driver/mysql" // mysql
 	"github.com/go-xorm/xorm"          // engine
@@ -17,7 +17,15 @@ import (
 */
 const ContextMySQLName = "mysql"
 const ContextRedisName = "redis"
-const ContextKafkaName = "kafka"
+
+var Address = []string{"0.0.0.0:9092"}
+
+type MessageProcess struct {
+	mysqlEngine    *xorm.Engine
+	redisClient    *redis.Client
+	kafkaAProducer *sarama.AsyncProducer
+	kafkaSProducer *sarama.SyncProducer
+}
 
 /*
 	The initilation functions
@@ -52,26 +60,33 @@ func InitRedis(addr string, pswd string, device int) *redis.Client {
 	return rd
 }
 
-func InitKafkaProducer(address []string) (*sarama.AsyncProducer, error) {
-	config := sarama.NewConfig()
-	config.Producer.Return.Successes = true
-	config.Producer.Timeout = 5 * time.Second
-
-	producer, err := sarama.NewAsyncProducer(address, config)
-
-	if err != nil {
-		panic(err)
+func MessageClose(message *MessageProcess) {
+	if message.mysqlEngine != nil {
+		defer message.mysqlEngine.Close()
 	}
 
-	return &producer, nil
+	if message.redisClient != nil {
+		defer message.redisClient.Close()
+	}
+
+	if message.kafkaAProducer != nil {
+		defer (*message.kafkaAProducer).Close()
+	}
+
+	if message.kafkaSProducer != nil {
+		defer (*message.kafkaSProducer).Close()
+	}
 }
 
-func InitKafkaConsumer(address []string) (*sarama.Consumer, error) {
-	config := sarama.NewConfig()
-	consumer, err := sarama.NewConsumer(address, config)
-	if err != nil {
-		panic(err)
-	}
+func InitMessageProcesser() *MessageProcess {
+	db := InitMySQL("mysql", "root:123456@tcp(127.0.0.1:3306)/hdd?charset=utf8")
+	rd := InitRedis("localhost:6379", "", 0)
+	producer := InitKafkaAsyncProducer(Address)
 
-	return &consumer, nil
+	return &MessageProcess{
+		mysqlEngine:    db,
+		redisClient:    rd,
+		kafkaAProducer: producer,
+		kafkaSProducer: nil,
+	}
 }

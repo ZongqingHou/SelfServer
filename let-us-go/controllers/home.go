@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -11,17 +10,20 @@ type HomeController struct {
 }
 
 func (controller HomeController) Init(group *echo.Group) {
-	group.GET("", controller.Get)
-	group.GET("hello", controller.Controller)
+	group.GET("", controller.Index)
+	group.GET("login", controller.HomeLogin)
+	group.GET("logon", controller.HomeLogon)
 }
 
-func (HomeController) Get(context echo.Context) error {
-	serverRequest := context.Request()
-	contextPtr := serverRequest.Context()
-	fmt.Println(contextPtr)
+func (HomeController) Index(context echo.Context) error {
 	return context.String(http.StatusOK, "Hello, World!")
 }
 
-func (HomeController) Controller(context echo.Context) error {
+func (HomeController) HomeLogin(context echo.Context) error {
+
+	return context.String(http.StatusOK, "wow")
+}
+
+func (HomeController) HomeLogon(context echo.Context) error {
 	return context.String(http.StatusOK, "wow")
 }

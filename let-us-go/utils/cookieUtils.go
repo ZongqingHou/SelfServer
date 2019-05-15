@@ -8,8 +8,8 @@ import (
 	"github.com/labstack/echo"
 )
 
-type Cookie struct {
-}
+// type Cookie struct {
+// }
 
 func writeCookie(c echo.Context) error {
 	cookie := new(http.Cookie)
