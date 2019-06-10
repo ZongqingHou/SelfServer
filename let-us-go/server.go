@@ -12,14 +12,6 @@ import (
 	"./utils"
 )
 
-type ServerConfig struct {
-	Database struct {
-	}
-
-	Server struct {
-	}
-}
-
 func main() {
 	message := utils.InitMessageProcesser()
 	utils.MessageClose(message)
