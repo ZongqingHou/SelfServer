@@ -8,8 +8,7 @@ import (
 
 	"./controllers"
 	// "./modules"
-
-	"./utils"
+	// "./utils"
 )
 
 type ServerConfig struct {
@@ -21,22 +20,23 @@ type ServerConfig struct {
 }
 
 func main() {
-	message := utils.InitMessageProcesser()
-	utils.MessageClose(message)
+	// message := utils.InitMessageProcesser()
+	// utils.MessageClose(message)
 
 	server := echo.New()
 
 	server_header := &http.Server{
-		Addr:         ":1323",
+		Addr:         ":80",
 		ReadTimeout:  20 * time.Minute,
 		WriteTimeout: 20 * time.Minute,
 	}
 
 	controllers.HomeController{}.Init(server.Group("/"))
 	controllers.TestController{}.Init(server.Group("/test"))
+	controllers.WechatController{}.Init(server.Group("/wechat"))
 
-	server.Use(utils.ContextSession(message))
-	server.Static("/static", "static")
+	// server.Use(utils.ContextSession(message))
+	// server.Static("/static", "static")
 
 	/*
 		need to use the middleware for pre and use functions
