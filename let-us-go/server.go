@@ -24,7 +24,7 @@ func main() {
 	}
 
 	controllers.HomeController{}.Init(server.Group("/"))
-	controllers.TestController{}.Init(server.Group("/test"))
+	// controllers.TestController{}.Init(server.Group("/test"))
 	controllers.WechatController{}.Init(server.Group("/wechat"))
 
 	// server.Use(utils.ContextSession(message))
