@@ -16,7 +16,7 @@ type WechatController struct {
 }
 
 func (controller WechatController) Init(group *echo.Group) {
-	group.GET("", controller.Index)
+	group.Any("", controller.Index)
 }
 
 func (WechatController) Index(context echo.Context) error {
@@ -25,25 +25,17 @@ func (WechatController) Index(context echo.Context) error {
 	nonce := context.QueryParam("nonce")
 	echostr := context.QueryParam("echostr")
 
-	// println(context.QueryParams())
-	// if context.QueryParams() == nil {
-	// 	return nil
-	// }
 	string_collection := []string{WECHAT_TOKEN, timestamp, nonce}
 	sort.Strings(string_collection)
+
+	println(context)
 
 	cmp_string := strings.Join(string_collection, "")
 	cmp_string = utils.Sha1(cmp_string)
 
 	if cmp_string == signature {
 		return context.String(http.StatusOK, echostr)
+	} else {
+		return context.String(http.StatusForbidden, "Invalid Source")
 	}
-	println(cmp_string)
-	println(WECHAT_TOKEN)
-	println(signature)
-	println(timestamp)
-	println(nonce)
-	println(echostr)
-
-	return context.String(http.StatusOK, "Hello, World!")
 }
